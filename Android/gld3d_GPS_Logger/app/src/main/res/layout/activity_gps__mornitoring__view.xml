@@ -12,5 +12,50 @@
     <TextView
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="Hello World!" />
+        android:text="Lat. :"
+        android:id="@+id/textView_Lat"
+        android:layout_alignParentTop="true"
+        android:layout_alignParentLeft="true"
+        android:layout_alignParentStart="true" />
+
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Lon. :"
+        android:id="@+id/textView_Lon"
+        android:layout_below="@+id/textView_Lat"
+        android:layout_alignParentLeft="true"
+        android:layout_alignParentStart="true"
+        android:layout_marginTop="23dp" />
+
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Alt. :"
+        android:id="@+id/textView_Alt"
+        android:layout_marginTop="28dp"
+        android:layout_below="@+id/textView_Lon"
+        android:layout_alignParentLeft="true"
+        android:layout_alignParentStart="true" />
+
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Accuracy :"
+        android:id="@+id/textView_Accuracy"
+        android:layout_marginTop="32dp"
+        android:layout_below="@+id/textView_Alt"
+        android:layout_alignParentLeft="true"
+        android:layout_alignParentStart="true" />
+
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Updated :"
+        android:id="@+id/textView_Update"
+        android:layout_marginTop="30dp"
+        android:layout_below="@+id/textView_Accuracy"
+        android:layout_alignParentLeft="true"
+        android:layout_alignParentStart="true" />
+
 </RelativeLayout>
