@@ -6,9 +6,12 @@ import android.location.Location;
 import android.location.LocationListener;
 import android.location.LocationManager;
 import android.net.Uri;
+import android.os.Environment;
 import android.provider.Settings;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
+import android.view.View;
+import android.widget.Button;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -16,6 +19,11 @@ import com.google.android.gms.appindexing.Action;
 import com.google.android.gms.appindexing.AppIndex;
 import com.google.android.gms.common.api.GoogleApiClient;
 
+import java.io.File;
+import java.io.FileNotFoundException;
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.io.OutputStreamWriter;
 import java.util.Calendar;
 import java.util.GregorianCalendar;
 
@@ -26,6 +34,68 @@ public class GPS_Mornitoring_View extends AppCompatActivity implements LocationL
      * See https://g.co/AppIndexing/AndroidStudio for more information.
      */
     private GoogleApiClient client;
+    private Boolean bRecording = Boolean.FALSE;
+    private File    fLogFile;
+    private FileOutputStream    fOutStream;
+    private OutputStreamWriter  outStreamWriter;
+
+    public String getDateTimeString()
+    {
+        //Time
+        StringBuilder   strBuilder_curTime = new StringBuilder();
+        Calendar        calenar_ = new GregorianCalendar();
+
+        strBuilder_curTime.append(String.format("%d_%d_%d_%d_%d_%d",
+                calenar_.get(Calendar.YEAR),
+                calenar_.get(Calendar.MONTH)+1,
+                calenar_.get(Calendar.DAY_OF_MONTH),
+                calenar_.get(Calendar.HOUR_OF_DAY),
+                calenar_.get(Calendar.MINUTE),
+                calenar_.get(Calendar.SECOND)
+        ));
+
+        String  strDateTime =  strBuilder_curTime.toString();
+
+        return strDateTime;
+    }
+
+    public void onClick(View v) {
+        switch (v.getId()) {
+            case R.id.button_Save:
+            {
+                Button btn = (Button)v;
+                //정지 상태였다면...
+                if(bRecording==Boolean.FALSE)
+                {
+                    try
+                    {
+                        String logPath = Environment.getExternalStorageDirectory().getAbsolutePath()+"/" + getDateTimeString()+".csv";
+                        fLogFile        = new File(logPath);
+                        fLogFile.createNewFile();
+                        fOutStream      = new FileOutputStream(fLogFile);
+                        outStreamWriter = new OutputStreamWriter(fOutStream);
+                    }  catch (FileNotFoundException e) {e.printStackTrace();}
+                    catch (IOException e) {e.printStackTrace();}
+
+                    btn.setText("Stop Recording");
+                    bRecording=Boolean.TRUE;
+                }
+                //저장 중이었으면...
+                else {
+                    try
+                    {
+                        outStreamWriter.close();
+                        fOutStream.close();
+                    }  catch (FileNotFoundException e) {e.printStackTrace();}
+                    catch (IOException e) {e.printStackTrace();}
+
+                    btn.setText("Start Recording");
+                    bRecording=Boolean.FALSE;
+                }
+            }
+            break;
+        }
+    }
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -37,6 +107,9 @@ public class GPS_Mornitoring_View extends AppCompatActivity implements LocationL
         // ATTENTION: This was auto-generated to implement the App Indexing API.
         // See https://g.co/AppIndexing/AndroidStudio for more information.
         client = new GoogleApiClient.Builder(this).addApi(AppIndex.API).build();
+
+        bRecording = Boolean.FALSE;
+
     }
 
     @Override
@@ -52,20 +125,11 @@ public class GPS_Mornitoring_View extends AppCompatActivity implements LocationL
         String strLon = "Lon.: " + location.getLongitude();
         String strAlt = "Alt.: " + location.getAltitude();
         String strAccrc = "Accuracy : " + location.getAccuracy();
-//        String strUpdt =
 
         //Time
+        String strDateTime = getDateTimeString();
         StringBuilder   strBuilder_curTime = new StringBuilder();
-        Calendar        calenar_ = new GregorianCalendar();
-
-        strBuilder_curTime.append(String.format("Updated : %d_%d_%d_%d_%d_%d",
-                calenar_.get(Calendar.YEAR),
-                calenar_.get(Calendar.MONTH)+1,
-                calenar_.get(Calendar.DAY_OF_MONTH),
-                calenar_.get(Calendar.HOUR_OF_DAY),
-                calenar_.get(Calendar.MINUTE),
-                calenar_.get(Calendar.SECOND)
-                ));
+        strBuilder_curTime.append(String.format("Updated : %s",strDateTime ));
 
         textView_Lat.setText(strLat);
         textView_Lon.setText(strLon);
@@ -73,7 +137,23 @@ public class GPS_Mornitoring_View extends AppCompatActivity implements LocationL
         textView_Accuracy.setText(strAccrc);
         textView_Update.setText(strBuilder_curTime);
 
+        if(bRecording)
+        {
+            StringBuilder   strBuilder_file_log = new StringBuilder();
+            strBuilder_file_log.append(String.format("%s,%f,%f,%f,%f\n",
+                    strDateTime,
+                    location.getLatitude(),
+                    location.getLongitude(),
+                    location.getAltitude(),
+                    location.getAccuracy()));
 
+            try
+            {
+                outStreamWriter.append(strBuilder_file_log);
+            }  catch (FileNotFoundException e) {e.printStackTrace();}
+            catch (IOException e) {e.printStackTrace();}
+
+        }
 
     }
 
