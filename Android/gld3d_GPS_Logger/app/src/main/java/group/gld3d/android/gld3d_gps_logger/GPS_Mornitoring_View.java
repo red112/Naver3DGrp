@@ -74,6 +74,12 @@ public class GPS_Mornitoring_View extends AppCompatActivity implements LocationL
                         fLogFile.createNewFile();
                         fOutStream      = new FileOutputStream(fLogFile);
                         outStreamWriter = new OutputStreamWriter(fOutStream);
+
+                        //KML Header
+                        String strKMLHeader = "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n "+
+                        "<kml xmlns=\"http://www.opengis.net/kml/2.2\"><Document>";
+                        outStreamWriter.append(strKMLHeader);
+
                     }  catch (FileNotFoundException e) {e.printStackTrace();}
                     catch (IOException e) {e.printStackTrace();}
 
@@ -84,6 +90,10 @@ public class GPS_Mornitoring_View extends AppCompatActivity implements LocationL
                 else {
                     try
                     {
+                        //KML Footer
+                        String strKMLFooter = "</Document></kml>";
+                        outStreamWriter.append(strKMLFooter);
+
                         outStreamWriter.close();
                         fOutStream.close();
                     }  catch (FileNotFoundException e) {e.printStackTrace();}
@@ -140,12 +150,20 @@ public class GPS_Mornitoring_View extends AppCompatActivity implements LocationL
         if(bRecording)
         {
             StringBuilder   strBuilder_file_log = new StringBuilder();
+
+            /*
             strBuilder_file_log.append(String.format("%s,%f,%f,%f,%f\n",
                     strDateTime,
                     location.getLatitude(),
                     location.getLongitude(),
                     location.getAltitude(),
                     location.getAccuracy()));
+                    */
+            strBuilder_file_log.append(String.format("<Placemark><description>R %.2f</description><Point><coordinates>%.16f,%.16f,%.4f</coordinates></Point></Placemark>\n",
+                    location.getAccuracy(),
+                    location.getLongitude(),
+                    location.getLatitude(),
+                    location.getAltitude()));
 
             try
             {
