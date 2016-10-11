@@ -69,7 +69,7 @@ public class GPS_Mornitoring_View extends AppCompatActivity implements LocationL
                 {
                     try
                     {
-                        String logPath = Environment.getExternalStorageDirectory().getAbsolutePath()+"/" + getDateTimeString()+".csv";
+                        String logPath = Environment.getExternalStorageDirectory().getAbsolutePath()+"/" + getDateTimeString()+".kml";
                         fLogFile        = new File(logPath);
                         fLogFile.createNewFile();
                         fOutStream      = new FileOutputStream(fLogFile);
