@@ -183,6 +183,7 @@ void CMRLab_GL2HoloDlg::OnDestroy()
 void CMRLab_GL2HoloDlg::OnBnClickedBtnFileOpen()
 {
 	// TODO: Add your control notification handler code here
+
 	//Filter 설정 - 적당한 필터 적용
 	const char imagefileFilter[] = "All(*.*)|*.*|PCD(*.pcd)|*.pcd|OBJ file|*.obj;*.OBJ||";
 	CFileDialog dlgFile(true, NULL, NULL, OFN_HIDEREADONLY | OFN_OVERWRITEPROMPT, imagefileFilter, NULL,0);

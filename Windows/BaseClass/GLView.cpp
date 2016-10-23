@@ -59,9 +59,11 @@ CGLView::CGLView()
 	//ORTHOGONAL VIEWING VOLUME
 	m_vp.OrthoView[0]=m_vp.OrthoView[2]=m_vp.OrthoView[4]=	-100.0;
 	m_vp.OrthoView[1]=m_vp.OrthoView[3]=m_vp.OrthoView[5]=	100.0;
+	m_vp.Distance2VolumeRatio = 0.4f;
 
 	//PROJECTION MODE
 	m_vp.IsPerspective = GL_TRUE;
+	m_vp.IsPerspective = GL_FALSE;
 
 	//MODELVIEW MATRIX
 	GLfloat vmat[16]=
@@ -159,6 +161,7 @@ void CGLView::CreateGLView(CView* pParent,CRect rect)
 	m_vp.AspectRatio	= (GLdouble)m_vp.Width/(GLdouble)m_vp.Height;
 
 	m_vp.TrackBallSqrSize = (float)(m_vp.Height*m_vp.Height + m_vp.Width*m_vp.Width)/4.f;
+	Update_Ortho();
 
 
 }
@@ -189,15 +192,33 @@ void CGLView::ClearBuffer()
 	glClear(m_dp.ClearBits);
 }
 
+void CGLView::Update_Ortho()
+{
+	//높이를 거리의 두배로 설정.
+	GLfloat fBaseLength = m_vp.CameraDistance * m_vp.Distance2VolumeRatio;
+
+	m_vp.OrthoView[2] = -fBaseLength;	//Bottom
+	m_vp.OrthoView[3] = fBaseLength;	//Top
+
+	m_vp.OrthoView[0] = -fBaseLength * m_vp.AspectRatio;	//Left
+	m_vp.OrthoView[1] = fBaseLength * m_vp.AspectRatio;	//Right
+
+	m_vp.OrthoView[4] = m_vp.Near;	//Near
+	m_vp.OrthoView[5] = m_vp.Far;	//Far
+}
+
 void CGLView::Setup_Projection()
 {
 	glMatrixMode(GL_PROJECTION);
 	glLoadIdentity();
 
 	if(m_vp.IsPerspective) 	gluPerspective(m_vp.FOV, m_vp.AspectRatio, m_vp.Near, m_vp.Far);
-	else					glOrtho(m_vp.OrthoView[0],m_vp.OrthoView[1],
-									m_vp.OrthoView[2],m_vp.OrthoView[3],
-									m_vp.OrthoView[4],m_vp.OrthoView[5]);
+	else
+	{
+		glOrtho(m_vp.OrthoView[0], m_vp.OrthoView[1],
+			m_vp.OrthoView[2], m_vp.OrthoView[3],
+			m_vp.OrthoView[4], m_vp.OrthoView[5]);
+	}
 }
 
 void CGLView::Setup_Camera()
@@ -480,6 +501,9 @@ BOOL CGLView::OnMouseWheel(UINT nFlags, short zDelta, CPoint pt)
 	if(zDelta>0)	m_vp.CameraDistance *= 1.005f;
 	else			m_vp.CameraDistance *= 0.995f;
 
+	if (m_vp.IsPerspective == GL_FALSE)
+		Update_Ortho();
+
 	Invalidate(FALSE);
 
 	return CView::OnMouseWheel(nFlags, zDelta, pt);
@@ -507,4 +531,12 @@ void	CGLView::DrawAxis()
 	glVertex3f(0.f, 0.f, 0.f); glVertex3f( 0.f,0.f, m_vp.axisLength);
 	glEnd();
 	glPopAttrib();
+}
+
+
+//Projection
+void	CGLView::ToggleProjection()
+{
+	m_vp.IsPerspective = !m_vp.IsPerspective;
+	Invalidate();
 }

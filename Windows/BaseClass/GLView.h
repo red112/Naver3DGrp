@@ -45,6 +45,7 @@ public:
 
 		//ORTHOGONAL VIEWING VOLUME
 		GLdouble	OrthoView[6];
+		GLfloat		Distance2VolumeRatio;	
 
 		//MODELVIEW MATRIX
 		GLfloat		vMat[16];
@@ -127,6 +128,7 @@ public:
 	virtual void	Setup_Viewport();
 	virtual void	ClearBuffer();
 	virtual void	Setup_Projection();
+	virtual void	Update_Ortho();
 	virtual void	Setup_Camera();
 
 	//Camera
@@ -144,6 +146,9 @@ public:
 
 	//Axis
 	void	DrawAxis();
+
+	//Projection
+	void	ToggleProjection();
 
 		
 private:
