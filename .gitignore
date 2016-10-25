@@ -3,3 +3,6 @@
 *.db
 Windows/BaseProject/gld3d_Base_Dlg/UpgradeLog.htm
 *.opendb
+Windows/Projects/CGAL_Review/UpgradeLog.htm
+*.idb
+Windows/Projects/CGAL_Review/Debug/MRLab_GL2Holo.res
