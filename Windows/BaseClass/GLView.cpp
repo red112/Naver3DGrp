@@ -86,6 +86,7 @@ CGLView::CGLView()
 
 	//CAMERA
 	m_vp.CameraDistance = 350.f;
+	m_vp.CameraCntr[0] = m_vp.CameraCntr[1] = m_vp.CameraCntr[2] = 0.f;
 
 	//AXIS
 	m_vp.bShowAxis = GL_TRUE;// GL_FALSE;
@@ -226,8 +227,10 @@ void CGLView::Setup_Camera()
 	glMatrixMode(GL_MODELVIEW);
 	glLoadIdentity();
 
+	//원점으로 옮겨서 회전 시킨 후, 거리만큼 뒤로 보낸다.
 	glTranslatef(0.f,0.f,-m_vp.CameraDistance);
 	glMultMatrixf(m_vp.vMat);
+	glTranslatef(-m_vp.CameraCntr[0], -m_vp.CameraCntr[1], -m_vp.CameraCntr[2]);
 
 
 	/*

@@ -67,6 +67,7 @@ public:
 		GLboolean	LightOn;
 
 		//CAMERA
+		GLfloat		CameraCntr[3];
 		GLfloat		CameraDistance;
 
 		//Axis
