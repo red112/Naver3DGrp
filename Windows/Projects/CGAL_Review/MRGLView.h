@@ -14,6 +14,4 @@ public:
 	int		m_obj_id;
 
 	void	DrawGL();
-
-//	BOOL	OnMouseWheel(UINT nFlags, short zDelta, CPoint pt);
 };

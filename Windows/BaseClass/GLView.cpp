@@ -73,7 +73,7 @@ CGLView::CGLView()
 		0.f,	0.f,	1.f,	0.f,
 		0.f,	0.f,	0.f,	1.f,
 	};
-	memcpy(m_vp.vMat,vmat,sizeof(GLfloat)*16);
+	memcpy(m_vp.vMatRot,vmat,sizeof(GLfloat)*16);
 
 
 	//LIGHT0 - Base LIght
@@ -100,7 +100,8 @@ CGLView::CGLView()
 	m_dp.hdc	= 0;
 	m_dp.hglrc	= 0;
 
-	m_bDrag = FALSE;
+	m_bDragRot = FALSE;
+	m_bDragPan = FALSE;
 
 
 }
@@ -115,7 +116,7 @@ void CGLView::InitVMat()
 		0.f,	0.f,	1.f,	0.f,
 		0.f,	0.f,	0.f,	1.f,
 	};
-	memcpy(m_vp.vMat,vmat,sizeof(GLfloat)*16);
+	memcpy(m_vp.vMatRot,vmat,sizeof(GLfloat)*16);
 
 }
 
@@ -132,6 +133,8 @@ BEGIN_MESSAGE_MAP(CGLView, CView)
 	ON_WM_DESTROY()
 	ON_WM_LBUTTONDOWN()
 	ON_WM_LBUTTONUP()
+	ON_WM_MBUTTONDOWN()
+	ON_WM_MBUTTONUP()
 	ON_WM_MOUSEMOVE()
 	ON_WM_MOUSEWHEEL()
 	ON_WM_ERASEBKGND()
@@ -229,8 +232,8 @@ void CGLView::Setup_Camera()
 
 	//원점으로 옮겨서 회전 시킨 후, 거리만큼 뒤로 보낸다.
 	glTranslatef(0.f,0.f,-m_vp.CameraDistance);
-	glMultMatrixf(m_vp.vMat);
-	glTranslatef(-m_vp.CameraCntr[0], -m_vp.CameraCntr[1], -m_vp.CameraCntr[2]);
+	glMultMatrixf(m_vp.vMatRot);	//Rotate
+	glTranslatef(-m_vp.CameraCntr[0], -m_vp.CameraCntr[1], -m_vp.CameraCntr[2]);	//Translate
 
 
 	/*
@@ -244,6 +247,9 @@ void CGLView::Setup_Camera()
 void CGLView::DrawGL()
 {
 	DrawAxis();
+	DrawViewAxis();
+	DrawCamCenterAxis();
+
 	glColor3f(1.f,0.5f,0.5f);
 	//glutSolidCube(50.f);
 	glutSolidSphere(50.,20,20);
@@ -438,7 +444,7 @@ void CGLView::OnDestroy()
 void CGLView::OnLButtonDown(UINT nFlags, CPoint point)
 {
 	// TODO: Add your message handler code here and/or call default
-	m_bDrag = TRUE;
+	m_bDragRot = TRUE;
 
 	m_vp.oPt[0] = m_vp.cPt[0]	=	(float)(point.x - m_vp.Width/2);
 	m_vp.oPt[1] = m_vp.cPt[1]	=	(float)(m_vp.Height/2 - point.y);
@@ -451,46 +457,93 @@ void CGLView::OnLButtonDown(UINT nFlags, CPoint point)
 void CGLView::OnLButtonUp(UINT nFlags, CPoint point)
 {
 	// TODO: Add your message handler code here and/or call default
-	m_bDrag = FALSE;
+	m_bDragRot = FALSE;
 
 	CView::OnLButtonUp(nFlags, point);
 }
 
+
+void CGLView::OnMButtonDown(UINT nFlags, CPoint point)
+{
+	// TODO: Add your message handler code here and/or call default
+	m_bDragPan = TRUE;
+
+	m_vp.oPt[0] = m_vp.cPt[0] = (float)(point.x);
+	m_vp.oPt[1] = m_vp.cPt[1] = (float)(point.y);
+	m_vp.oPt[2] = m_vp.cPt[2] = 0.f;
+
+	CView::OnMButtonDown(nFlags, point);
+}
+
+
+void CGLView::OnMButtonUp(UINT nFlags, CPoint point)
+{
+	// TODO: Add your message handler code here and/or call default
+	m_bDragPan = FALSE;
+
+	CView::OnMButtonUp(nFlags, point);
+}
+
+
 void CGLView::OnMouseMove(UINT nFlags, CPoint point)
 {
 	// TODO: Add your message handler code here and/or call default
-	if(!m_bDrag)	return;
+	if(!m_bDragRot && !m_bDragPan)	return;
 
-	//Point on Trackball
-	m_vp.cPt[0]	=	(float)(point.x - m_vp.Width/2);
-	m_vp.cPt[1]	=	(float)(m_vp.Height/2 - point.y);
-	m_vp.cPt[2]	=	sqrt(m_vp.TrackBallSqrSize - m_vp.cPt[0] * m_vp.cPt[0] - m_vp.cPt[1] * m_vp.cPt[1]);
-//	printf("CPoint =%f, %f, %f\n",m_vp.cPt[0],m_vp.cPt[1],m_vp.cPt[2]);
+	if (m_bDragRot)
+	{
+		//Point on Trackball
+		m_vp.cPt[0] = (float)(point.x - m_vp.Width / 2);
+		m_vp.cPt[1] = (float)(m_vp.Height / 2 - point.y);
+		m_vp.cPt[2] = sqrt(m_vp.TrackBallSqrSize - m_vp.cPt[0] * m_vp.cPt[0] - m_vp.cPt[1] * m_vp.cPt[1]);
+		//	printf("CPoint =%f, %f, %f\n",m_vp.cPt[0],m_vp.cPt[1],m_vp.cPt[2]);
 
-	//Rot axis
-	m_vp.rotAx[0] = m_vp.oPt[1]*m_vp.cPt[2]-m_vp.oPt[2]*m_vp.cPt[1];
-	m_vp.rotAx[1] = m_vp.oPt[2]*m_vp.cPt[0]-m_vp.oPt[0]*m_vp.cPt[2];
-	m_vp.rotAx[2] = m_vp.oPt[0]*m_vp.cPt[1]-m_vp.oPt[1]*m_vp.cPt[0];
+		//Rot axis
+		m_vp.rotAx[0] = m_vp.oPt[1] * m_vp.cPt[2] - m_vp.oPt[2] * m_vp.cPt[1];
+		m_vp.rotAx[1] = m_vp.oPt[2] * m_vp.cPt[0] - m_vp.oPt[0] * m_vp.cPt[2];
+		m_vp.rotAx[2] = m_vp.oPt[0] * m_vp.cPt[1] - m_vp.oPt[1] * m_vp.cPt[0];
 
-	//angle
-	float angle;
-	angle = acos(( m_vp.cPt[0]*m_vp.oPt[0] + m_vp.cPt[1]*m_vp.oPt[1] + m_vp.cPt[2]*m_vp.oPt[2] ) / (m_vp.TrackBallSqrSize ));
+		//angle
+		float angle;
+		angle = acos((m_vp.cPt[0] * m_vp.oPt[0] + m_vp.cPt[1] * m_vp.oPt[1] + m_vp.cPt[2] * m_vp.oPt[2]) / (m_vp.TrackBallSqrSize));
 
-	this->BeginGL();
-	glMatrixMode(GL_MODELVIEW);
-	glPushMatrix();
-	glLoadIdentity();
+	//	m_vp.vMatRot[12] = m_vp.vMatRot[13] = m_vp.vMatRot[14] = 0.f; //Remove translate
+		this->BeginGL();
+		glMatrixMode(GL_MODELVIEW);
+		glLoadIdentity();
+		glRotatef(angle*180.f / 3.141592f, m_vp.rotAx[0], m_vp.rotAx[1], m_vp.rotAx[2]);
+		glMultMatrixf(m_vp.vMatRot);
+		glGetFloatv(GL_MODELVIEW_MATRIX, m_vp.vMatRot);
+	//	m_vp.vMatRot[12] = m_vp.vMatRot[13] = m_vp.vMatRot[14] = 0.f; //Remove translate
+		this->EndGL();
+		m_vp.oPt[0] = m_vp.cPt[0];
+		m_vp.oPt[1] = m_vp.cPt[1];
+		m_vp.oPt[2] = m_vp.cPt[2];
+	}
+	else if (m_bDragPan)
+	{
+		//Delta
+		float dH = -(float)(point.x - m_vp.oPt[0]);
+		float dV = -(float)(m_vp.oPt[1] - point.y);
+		float fScale = m_vp.CameraDistance * 0.001f;
 
-	glRotatef(angle*180.f/3.141592f,m_vp.rotAx[0],m_vp.rotAx[1],m_vp.rotAx[2]);
-	glMultMatrixf(m_vp.vMat);
-	glGetFloatv(GL_MODELVIEW_MATRIX,m_vp.vMat);
-	glPopMatrix();
-	this->EndGL();
+		float dP[3];
+		dP[0] = (m_vp.vMatRot[0] * dH + m_vp.vMatRot[1] * dV) * fScale;
+		dP[1] = (m_vp.vMatRot[4] * dH + m_vp.vMatRot[5] * dV) * fScale;
+		dP[2] = (m_vp.vMatRot[8] * dH + m_vp.vMatRot[9] * dV) * fScale;
+
+		m_vp.CameraCntr[0] += dP[0];
+		m_vp.CameraCntr[1] += dP[1];
+		m_vp.CameraCntr[2] += dP[2];
+
+		m_vp.oPt[0] = m_vp.cPt[0] = point.x;
+		m_vp.oPt[1] = m_vp.cPt[1] = point.y;
+		m_vp.oPt[2] = m_vp.cPt[2] = 0.f;
+	}
 
 
-	m_vp.oPt[0]	= m_vp.cPt[0];
-	m_vp.oPt[1]	= m_vp.cPt[1];
-	m_vp.oPt[2]	= m_vp.cPt[2];
+
+
 
 	Invalidate(FALSE);
 
@@ -534,6 +587,51 @@ void	CGLView::DrawAxis()
 	glVertex3f(0.f, 0.f, 0.f); glVertex3f( 0.f,0.f, m_vp.axisLength);
 	glEnd();
 	glPopAttrib();
+}
+
+void	CGLView::DrawViewAxis()
+{
+	glPushAttrib(GL_LIGHTING_BIT);
+	glDisable(GL_LIGHTING);
+
+	glBegin(GL_LINES);
+
+	glColor3ub(0, 255, 255);
+	glVertex3f(0.f, 0.f, 0.f);
+	glVertex3f(m_vp.vMatRot[0] * 100.f, m_vp.vMatRot[4] * 100.f, m_vp.vMatRot[8] * 100.f);
+
+	glColor3ub(255, 0, 255);
+	glVertex3f(0.f, 0.f, 0.f);
+	glVertex3f(m_vp.vMatRot[1] * 100.f, m_vp.vMatRot[5] * 100.f, m_vp.vMatRot[9] * 100.f);
+
+	glColor3ub(255, 255, 0);
+	glVertex3f(0.f, 0.f, 0.f);
+	glVertex3f(m_vp.vMatRot[2] * 100.f, m_vp.vMatRot[6] * 100.f, m_vp.vMatRot[10] * 100.f);
+	glEnd();
+	glPopAttrib();
+}
+
+void	CGLView::DrawCamCenterAxis()
+{
+	glPushAttrib(GL_LIGHTING_BIT);
+	glDisable(GL_LIGHTING);
+
+	glBegin(GL_LINES);
+
+	glColor3ub(0, 255, 255);
+	glVertex3f(m_vp.CameraCntr[0], m_vp.CameraCntr[1], m_vp.CameraCntr[2]);
+	glVertex3f(m_vp.CameraCntr[0]+100.f, m_vp.CameraCntr[1], m_vp.CameraCntr[2]);
+
+	glColor3ub(255, 0, 255);
+	glVertex3f(m_vp.CameraCntr[0], m_vp.CameraCntr[1], m_vp.CameraCntr[2]);
+	glVertex3f(m_vp.CameraCntr[0], m_vp.CameraCntr[1] + 100.f, m_vp.CameraCntr[2]);
+
+	glColor3ub(255, 255, 0);
+	glVertex3f(m_vp.CameraCntr[0], m_vp.CameraCntr[1], m_vp.CameraCntr[2]);
+	glVertex3f(m_vp.CameraCntr[0], m_vp.CameraCntr[1], m_vp.CameraCntr[2] + 100.f);
+	glEnd();
+	glPopAttrib();
+
 }
 
 
