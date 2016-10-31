@@ -1,11 +1,11 @@
 #pragma once
 
-
 // CGLView ∫‰¿‘¥œ¥Ÿ.
-#include <gl/gl.h>
-#include <gl/glu.h>
+
+//#include <gl/gl.h>
+//#include <gl/glu.h>
+#include <gl/glew.h>
 #include <gl/glut.h>
-#include <gl/glaux.h>
 
 
 #define	DEFAULT_SIZE	50.f;

@@ -448,8 +448,7 @@ void CGLView::OnLButtonDown(UINT nFlags, CPoint point)
 
 	m_vp.oPt[0] = m_vp.cPt[0]	=	(float)(point.x - m_vp.Width/2);
 	m_vp.oPt[1] = m_vp.cPt[1]	=	(float)(m_vp.Height/2 - point.y);
-	m_vp.oPt[2] = m_vp.cPt[2]	=	sqrt(m_vp.TrackBallSqrSize - m_vp.oPt[0] * m_vp.oPt[0] - m_vp.oPt[1] * m_vp.oPt[1]);
-
+	m_vp.oPt[2] = m_vp.cPt[2]	=	(float)sqrt(m_vp.TrackBallSqrSize - m_vp.oPt[0] * m_vp.oPt[0] - m_vp.oPt[1] * m_vp.oPt[1]);
 
 	CView::OnLButtonDown(nFlags, point);
 }
@@ -458,7 +457,6 @@ void CGLView::OnLButtonUp(UINT nFlags, CPoint point)
 {
 	// TODO: Add your message handler code here and/or call default
 	m_bDragRot = FALSE;
-
 	CView::OnLButtonUp(nFlags, point);
 }
 
@@ -472,6 +470,7 @@ void CGLView::OnMButtonDown(UINT nFlags, CPoint point)
 	m_vp.oPt[1] = m_vp.cPt[1] = (float)(point.y);
 	m_vp.oPt[2] = m_vp.cPt[2] = 0.f;
 
+	SetCapture();
 	CView::OnMButtonDown(nFlags, point);
 }
 
@@ -480,6 +479,7 @@ void CGLView::OnMButtonUp(UINT nFlags, CPoint point)
 {
 	// TODO: Add your message handler code here and/or call default
 	m_bDragPan = FALSE;
+	ReleaseCapture();
 
 	CView::OnMButtonUp(nFlags, point);
 }
@@ -495,7 +495,7 @@ void CGLView::OnMouseMove(UINT nFlags, CPoint point)
 		//Point on Trackball
 		m_vp.cPt[0] = (float)(point.x - m_vp.Width / 2);
 		m_vp.cPt[1] = (float)(m_vp.Height / 2 - point.y);
-		m_vp.cPt[2] = sqrt(m_vp.TrackBallSqrSize - m_vp.cPt[0] * m_vp.cPt[0] - m_vp.cPt[1] * m_vp.cPt[1]);
+		m_vp.cPt[2] = (float)sqrt(m_vp.TrackBallSqrSize - m_vp.cPt[0] * m_vp.cPt[0] - m_vp.cPt[1] * m_vp.cPt[1]);
 		//	printf("CPoint =%f, %f, %f\n",m_vp.cPt[0],m_vp.cPt[1],m_vp.cPt[2]);
 
 		//Rot axis
@@ -505,7 +505,7 @@ void CGLView::OnMouseMove(UINT nFlags, CPoint point)
 
 		//angle
 		float angle;
-		angle = acos((m_vp.cPt[0] * m_vp.oPt[0] + m_vp.cPt[1] * m_vp.oPt[1] + m_vp.cPt[2] * m_vp.oPt[2]) / (m_vp.TrackBallSqrSize));
+		angle = (float)acos((m_vp.cPt[0] * m_vp.oPt[0] + m_vp.cPt[1] * m_vp.oPt[1] + m_vp.cPt[2] * m_vp.oPt[2]) / (m_vp.TrackBallSqrSize));
 
 	//	m_vp.vMatRot[12] = m_vp.vMatRot[13] = m_vp.vMatRot[14] = 0.f; //Remove translate
 		this->BeginGL();
@@ -536,8 +536,8 @@ void CGLView::OnMouseMove(UINT nFlags, CPoint point)
 		m_vp.CameraCntr[1] += dP[1];
 		m_vp.CameraCntr[2] += dP[2];
 
-		m_vp.oPt[0] = m_vp.cPt[0] = point.x;
-		m_vp.oPt[1] = m_vp.cPt[1] = point.y;
+		m_vp.oPt[0] = m_vp.cPt[0] = (float)point.x;
+		m_vp.oPt[1] = m_vp.cPt[1] = (float)point.y;
 		m_vp.oPt[2] = m_vp.cPt[2] = 0.f;
 	}
 

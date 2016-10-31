@@ -6,3 +6,5 @@ Windows/BaseProject/gld3d_Base_Dlg/UpgradeLog.htm
 Windows/Projects/CGAL_Review/UpgradeLog.htm
 *.idb
 Windows/Projects/CGAL_Review/Debug/MRLab_GL2Holo.res
+Windows/Projects/CGAL_Review/x64/Debug/MRLab_GL2Holo.res
+Windows/Projects/CGAL_Review/x64/Release/MRLab_GL2Holo.res
