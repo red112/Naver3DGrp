@@ -250,9 +250,9 @@ void CGLView::DrawGL()
 	DrawViewAxis();
 	DrawCamCenterAxis();
 
-	glColor3f(1.f,0.5f,0.5f);
+	//glColor3f(1.f,0.5f,0.5f);
 	//glutSolidCube(50.f);
-	glutSolidSphere(50.,20,20);
+	//glutSolidSphere(50.,20,20);
 }
 
 void CGLView::EndGL()
