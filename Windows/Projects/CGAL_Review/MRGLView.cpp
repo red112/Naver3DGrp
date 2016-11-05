@@ -14,14 +14,38 @@ CMRGLView::~CMRGLView(void)
 
 void CMRGLView::DrawGL()
 {
-	//요걸 쓰면 그냥 빨간 구만 나오고, 
-	//CGLView::DrawGL();
 	//필요하면 재정의 해서 쓰고...
 	DrawAxis();
 
 	glDisable(GL_LIGHTING);
-	glPointSize(4);
+	glDisable(GL_DEPTH_TEST);
 
+	//INPUT
+	glPointSize(10);
+	glBegin(GL_POINTS);
+	glColor3ub(255, 255, 0);
+	for (int i = 0; i < 5; i++) {
+		glVertex3d(points[i].x(), points[i].y(), 0.0);;
+	}
+	glEnd();
+
+	//Result
+	glBegin(GL_LINE_LOOP);
+	glColor3ub(0, 255, 255);
+	for (int i = 0; i < numCvPt; i++) {
+		glVertex3d(result[i].x(), result[i].y(), 0.0);;
+	}
+	glEnd();
+
+	glPointSize(4);
+	glBegin(GL_POINTS);
+	glColor3ub(255, 0, 0);
+	for (int i = 0; i < numCvPt; i++) {
+		glVertex3d(result[i].x(), result[i].y(), 0.0);;
+	}
+	glEnd();
+
+	/*
 	switch(orientation)
 	{
 	case CGAL::COLLINEAR:	glColor3ub(255, 255, 0);		break;
@@ -42,38 +66,40 @@ void CMRGLView::DrawGL()
 	glColor3ub(0, 0, 255);		glVertex3d(m.x(), m.y(), 0.0);
 	glColor3ub(255, 255, 255);	glVertex3d(mid.x(), mid.y(), 0.0);
 	glEnd();
+	*/
 
 	glPointSize(1);
+	glEnable(GL_DEPTH_TEST);
 	glEnable(GL_LIGHTING);
 }
 
 
 void CMRGLView::Init()
 {
+	//OpenGL용 각종 변수 초기화
 	CGLView::Init();
+	m_vp.CameraDistance = 40.f;
 
+	//CGAL 변수 초기화
+	points[0] = Point_2(6, 5);
+	points[1] = Point_2(0, 0);
+	points[2] = Point_2(4, 1);
+	points[3] = Point_2(10, 0);
+	points[4] = Point_2(10, 10);
+
+	ptr = CGAL::convex_hull_2(points, points + 5, result);
+	numCvPt = ptr - result;
+
+	/*
+	//Getting Start #1
 	p = Point_2(1, 1);
 	q = Point_2(10, 10);
 	s = Segment_2(p, q);
-	m = Point_2(5, 9);
+	m = Point_2(5, 4);
 
 	mid = CGAL::midpoint(p, q);
 	squared_distance = CGAL::squared_distance(p, q);
 	orientation = CGAL::orientation(p, q, m);
-
-	m_vp.CameraDistance = 40.f;
-
-	/*
-	case CGAL::COLLINEAR:
-		std::cout << "are collinear\n";
-		break;
-	case CGAL::LEFT_TURN:
-		std::cout << "make a left turn\n";
-		break;
-	case CGAL::RIGHT_TURN:
-		std::cout << "make a right turn\n";
-		break;
-	}
-	std::cout << " midpoint(p,q) = " << CGAL::midpoint(p, q) << std::endl;
 	*/
+
 }

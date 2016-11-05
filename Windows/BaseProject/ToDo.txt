@@ -1,0 +1,2 @@
+1.[gld3d_Base_Dlg] 메세지 출력 Edit view 추가
+2.[gld3d_Base_Dlg] 콘솔 출력
