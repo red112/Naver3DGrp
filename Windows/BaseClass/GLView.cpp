@@ -282,7 +282,9 @@ void CGLView::Init()
 
 	InitTexture();
 
-
+	glEnableClientState(GL_VERTEX_ARRAY);
+	glEnableClientState(GL_NORMAL_ARRAY);
+	glEnableClientState(GL_INDEX_ARRAY);
 
 	EndGL();
 }
